@@ -45,46 +45,44 @@ def sendEmail(title, newer):
     #     server.quit()
     #
     # pass
-class Search:
-    prevResults = 0
-    resNumber = ''
-    urlToSearch = ''
-
-    def __init__(self, url):
-        self.urlToSearch = url
-    def test(self):
-        print("ffs")
-
     def search(self):
+        global numToCheck
         self.resNumber = '0'
         page = requests.get(self.urlToSearch)
         soup = BeautifulSoup(page.content, 'html.parser')
         line = soup.find_all('h2')
         if len(line) > 2:
             line = line[2]
-            line = list(str(line)[9:22])  #for searches that contains promoted ads
+            line = list(str(line)[9:22])
         else:
-            line = list(str(line)[30:43]) # w/o promoted ads
-        
+            line = list(str(line)[30:43])
 
         for i in line:
             if i.isdigit():
                 self.resNumber += i
         if int(self.resNumber) != self.prevResults:
             # print(int(self.resNumber))
-            # will go in this function if the previous number of ads is not equal with the current number of ads
 
             if self.prevResults!=0 and self.prevResults < int(self.resNumber):
-                sendEmail(self.urlToSearch.split('/')[4][2:], int(self.resNumber) - self.prevResults)
+                print("prevRes = " + str(self.prevResults))
+                print("currentRes = " + self.resNumber)
+
+                sendEmail(self.urlToSearch.split('/')[4][2:], int(self.resNumber) - self.prevResults, self.urlToSearch)
             self.prevResults = int(self.resNumber)
-            print("works")
+            # print("works")
+            # print(numToCheck)
+          
+
         else:
-            print("works2")
-            print(self.urlToSearch.split('/')[4][2:])
-            print(self.prevResults)
-            print(int(self.resNumber))
-            print("-----")
+            # print("works2")
+            # print(self.urlToSearch.split('/')[4][2:])
+            # print(self.prevResults)
+            # print(int(self.resNumber))
+            # print("-----")
+          
+
             pass
+
 
 
 all = ['https://www.olx.ro/oferte/q-rig-minare',
@@ -102,9 +100,13 @@ for index, url in enumerate(all):
     # print(url)
     searchList.append(Search(url))
 
-
-while True:
+import threading
+# while True:
+def repeat():
     for obj in searchList:
+        # done = False
+        # if numToCheck == 0:
+            # numToCheck += 1
         obj.search()
-        # print("ok")
-      
+    threading.Timer(5.0, repeat).start()
+repeat()
